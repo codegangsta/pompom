@@ -183,14 +183,14 @@ func draw() {
 
 func drawDigit(x, y int, digit []int, color termbox.Attribute) {
 	for i, v := range digit {
-		char := ' '
 		x1 := x + i%DigitWidth
 		y1 := y + i/DigitWidth
 
 		if v == 1 {
-			char = '█'
+			termbox.SetCell(x1, y1, '█', color, color)
+		} else {
+			termbox.SetCell(x1, y1, ' ', color, 0)
 		}
 
-		termbox.SetCell(x1, y1, char, color, 0)
 	}
 }
