@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/nsf/termbox-go"
 	"math"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -118,6 +120,8 @@ func main() {
 
 	termbox.Init()
 	defer termbox.Close()
+
+	Label = strings.Join(os.Args[1:], " ")
 
 	events := make(chan termbox.Event)
 	go func() {
