@@ -114,7 +114,7 @@ var Digits = map[rune][]int{
 }
 
 var End = time.Now().Add(20 * time.Minute).Add(time.Second)
-var Label = "Hello world. This is a Pompom"
+var Label string
 
 func main() {
 
