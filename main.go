@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/nsf/termbox-go"
+	"math"
 	"time"
 )
 
@@ -110,7 +111,7 @@ var Digits = map[rune][]int{
 	':': Colon,
 }
 
-var End = time.Now().Add(20 * time.Minute)
+var End = time.Now().Add(20 * time.Minute).Add(time.Second)
 
 func main() {
 
@@ -145,29 +146,34 @@ func draw() {
 	// w, h := termbox.Size()
 
 	now := time.Now()
-	m := int(End.Sub(now) / time.Minute)
-	s := int((End.Sub(now) % time.Minute) / time.Second)
-	timeLeft := fmt.Sprintf("%02d:%02d", m, s)
+	t := time.Duration(math.Max(0, float64(End.Sub(now))))
+	timeLeft := fmt.Sprintf("%02d:%02d", (t / time.Minute), ((t % time.Minute) / time.Second))
+	color := termbox.ColorGreen
+
+	if t <= 5*time.Minute {
+		color = termbox.ColorRed
+	} else if t <= 10*time.Minute {
+		color = termbox.ColorYellow
+	}
 
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-
 	for i, r := range timeLeft {
-		drawDigit((DigitWidth+2)*i, 0, Digits[r])
+		drawDigit((DigitWidth+2)*i, 0, Digits[r], color)
 	}
 
 	termbox.Flush()
 }
 
-func drawDigit(x, y int, digit []int) {
+func drawDigit(x, y int, digit []int, color termbox.Attribute) {
 	for i, v := range digit {
 		char := ' '
 		x1 := x + i%DigitWidth
 		y1 := y + i/DigitWidth
 
 		if v == 1 {
-			char = '▒'
+			char = '█'
 		}
 
-		termbox.SetCell(x1, y1, char, termbox.ColorGreen, termbox.Attribute(termbox.AttrBold))
+		termbox.SetCell(x1, y1, char, color, 0)
 	}
 }
