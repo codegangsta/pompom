@@ -112,6 +112,7 @@ var Digits = map[rune][]int{
 }
 
 var End = time.Now().Add(20 * time.Minute).Add(time.Second)
+var Label = "Hello world. This is a Pompom"
 
 func main() {
 
@@ -143,7 +144,7 @@ loop:
 }
 
 func draw() {
-	// w, h := termbox.Size()
+	w, h := termbox.Size()
 
 	now := time.Now()
 	t := time.Duration(math.Max(0, float64(End.Sub(now))))
@@ -157,8 +158,20 @@ func draw() {
 	}
 
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+
+	// draw digits
+	cw := DigitWidth + 1
 	for i, r := range timeLeft {
-		drawDigit((DigitWidth+2)*i, 0, Digits[r], color)
+		x := w/2 + cw*i - cw*len(timeLeft)/2
+		y := h/2 - DigitWidth/2 - 2
+		drawDigit(x, y, Digits[r], color)
+	}
+
+	// draw label
+	for i, c := range Label {
+		x := w/2 + i - len(Label)/2
+		y := h/2 + 2
+		termbox.SetCell(x, y, c, color, 0)
 	}
 
 	termbox.Flush()
