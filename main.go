@@ -9,8 +9,13 @@ import (
 	"time"
 )
 
-var End = time.Now().Add(20 * time.Minute).Add(time.Second)
-var Label string
+var (
+	End      = time.Now().Add(20 * time.Minute).Add(time.Second)
+	Label    string
+	Duration = 20 * time.Minute
+	Current  time.Duration
+	Paused   bool
+)
 
 func main() {
 
@@ -18,6 +23,7 @@ func main() {
 	defer termbox.Close()
 
 	Label = strings.Join(os.Args[1:], " ")
+	ticker := time.NewTicker(1 * time.Second)
 
 	events := make(chan termbox.Event)
 	go func() {
@@ -25,8 +31,6 @@ func main() {
 			events <- termbox.PollEvent()
 		}
 	}()
-
-	draw()
 
 loop:
 	for {
@@ -36,22 +40,30 @@ loop:
 				break loop
 			}
 			if ev.Type == termbox.EventKey && ev.Key == termbox.KeySpace {
-				Label = "paused"
+				Paused = !Paused
+			}
+
+		case <-ticker.C:
+			if !Paused {
+				Current += time.Second
 			}
 
 		default:
-			draw()
+			if Paused {
+				draw(Current, "[Paused] "+Label)
+			} else {
+				draw(Current, Label)
+			}
 			time.Sleep(100 * time.Millisecond)
 		}
 	}
 
 }
 
-func draw() {
+func draw(current time.Duration, label string) {
 	w, h := termbox.Size()
 
-	now := time.Now()
-	t := time.Duration(math.Max(0, float64(End.Sub(now))))
+	t := time.Duration(math.Max(0, float64(Duration-current)))
 	timeLeft := fmt.Sprintf("%02d:%02d", (t / time.Minute), ((t % time.Minute) / time.Second))
 	color := termbox.ColorGreen
 
@@ -72,8 +84,8 @@ func draw() {
 	}
 
 	// draw label
-	for i, c := range Label {
-		x := w/2 + i - len(Label)/2
+	for i, c := range label {
+		x := w/2 + i - len(label)/2
 		y := h/2 + 2
 		termbox.SetCell(x, y, c, color, 0)
 	}
