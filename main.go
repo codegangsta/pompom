@@ -1,8 +1,10 @@
 package main
 
 import (
-	"fmt"
+	"github.com/codegangsta/cli"
 	"github.com/nsf/termbox-go"
+
+	"fmt"
 	"math"
 	"os"
 	"strings"
@@ -10,17 +12,37 @@ import (
 )
 
 var (
-	Duration = 25 * time.Minute
-	Label    string
-	Current  time.Duration
-	Paused   bool
+	Duration       = 25 * time.Minute
+	ExitOnComplete bool
+	Label          string
+	Current        time.Duration
+	Paused         bool
 )
 
 func main() {
+	app := cli.NewApp()
+	app.Name = "pompom"
+	app.Usage = "A simple pomodoro timer for the command line"
+	app.Action = mainAction
+	app.Flags = []cli.Flag{
+		cli.IntFlag{Name: "duration,d", Value: 25, Usage: "Duration in minutes"},
+		cli.BoolFlag{Name: "e", Usage: "Exit when the timer finishes"},
+	}
+
+	app.Run(os.Args)
+}
+
+func mainAction(c *cli.Context) {
+	// Duration flag
+	Duration = time.Duration(c.GlobalInt("duration")) * time.Minute
+
+	// Exit On Complete flag
+	ExitOnComplete = c.GlobalBool("e")
+
 	termbox.Init()
 	defer termbox.Close()
 
-	Label = strings.Join(os.Args[1:], " ")
+	Label = strings.Join(c.Args(), " ")
 	ticker := time.NewTicker(1 * time.Second)
 
 	events := make(chan termbox.Event)
@@ -44,6 +66,10 @@ loop:
 		case <-ticker.C:
 			if !Paused {
 				Current += time.Second
+			}
+
+			if Current > Duration && ExitOnComplete {
+				break loop
 			}
 
 		default:
