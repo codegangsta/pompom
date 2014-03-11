@@ -10,15 +10,13 @@ import (
 )
 
 var (
-	End      = time.Now().Add(20 * time.Minute).Add(time.Second)
+	Duration = 25 * time.Minute
 	Label    string
-	Duration = 20 * time.Minute
 	Current  time.Duration
 	Paused   bool
 )
 
 func main() {
-
 	termbox.Init()
 	defer termbox.Close()
 
@@ -57,7 +55,6 @@ loop:
 			time.Sleep(100 * time.Millisecond)
 		}
 	}
-
 }
 
 func draw(current time.Duration, label string) {
